@@ -15,6 +15,12 @@ export default class Vertex extends BasicGraphObject {
         this.id = id;
         this.class = vertexClass;
     }
+
+    getTuple(type: "in"|"out"): {edgeType: string, vId: string}[] {
+        let et = type=="in"?this.vIn:this.vOut;
+        return Object.keys(et).map(x=>et[x].map(y=>{return {edgeType: x, vId: y}})).flat();
+    }
+
     getId(): string {
         return this.id;
     }

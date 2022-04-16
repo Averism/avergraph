@@ -177,25 +177,25 @@ export default class AverGraph implements Hookable {
             e.hook=this;
         }
         for(let v of Object.values(this.vertexById)) {
-            if(v.getProps()){
-                for(let propKey of v.getProps().keys()){
-                    this.callHook("addProp",v,propKey);
-                }
-            }
+            if(v.getProps())
+                this.indexProp(v);
             if(!v.vOut) continue;
-            for(let edgeType of Object.keys(v.vOut)){
-                for(let vOut of v.vOut[edgeType]){
-                    let e = this.edgeById[`${v.getId()}-${edgeType}-${vOut}`];
-                    if(typeof e == "undefined")
-                        e = this.createEdge(v.getId(),vOut,edgeType);
-                    if(e.getProps()){
-                        for(let propKey of e.getProps().keys()){
-                            this.callHook("addProp",e,propKey);
-                        }
-                    }
+            let tuple = v.getTuple("out");
+            for(let t of tuple){
+                let e = this.edgeById[`${v.getId()}-${t.edgeType}-${t.vId}`];
+                if(typeof e == "undefined")
+                    e = this.createEdge(v.getId(),t.vId,t.edgeType);
+                if(e.getProps()){
+                    this.indexProp(e);
                 }
             }
         }
         // end load from files
+    }
+
+    private indexProp(o: Propable){
+        for(let propKey of o.getProps().keys()){
+            this.callHook("addProp",o,propKey);
+        }
     }
 }
