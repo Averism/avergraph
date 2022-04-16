@@ -24,7 +24,6 @@ describe("graph", ()=>{
 
         //not yet implemented
         strictEqual(graph.getVertices({}), undefined); 
-        strictEqual(graph.getEdges({}), undefined); 
     });
     it("should saves to files correctly", async ()=>{
         let graph = new AverGraph();
@@ -52,6 +51,18 @@ describe("graph", ()=>{
         strictEqual(graph.getEdge({source: "v1", target: "v2", edgeType: "default"}) instanceof Edge, true);
         strictEqual(graph.getEdge({source: "v2", target: "v3", edgeType: "default"}) instanceof Edge, true);
         strictEqual(graph.getEdge({source: "v1", target: "v2", edgeType: "default"}).getProp("p1"), "val1");
+        return Promise.resolve();
+    });
+    it("should search correctly", async ()=>{
+        let graph = new AverGraph();
+        graph.loadFromFiles(join("test","temp"));
+        graph.getVertex({id: "v1"}).setProp("p1","v1");
+        graph.getVertex({id: "v2"}).setProp("p1","a");
+        graph.createEdge("v1","v3","test");
+        strictEqual(graph.getVertices({hasPropsWithValues:{"p1":"a"}}).length,1);
+        strictEqual(graph.getEdges({hasProps:["p1"]}).length,1);
+        strictEqual(graph.getEdges({target: "v3"}).length,2);
+        strictEqual(graph.getVertices({hasProps:["p1"], idRegex:"v."}).length,2);
         return Promise.resolve();
     });
     after(()=>{

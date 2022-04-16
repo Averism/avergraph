@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node -r ts-node/register src/index.ts",
     "test": "mocha",
-    "cov": "nyc mocha"
+    "cov": "nyc --reporter=lcov --reporter=text mocha"
   },
   "author": "",
   "devDependencies": {

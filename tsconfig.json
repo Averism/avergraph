@@ -11,7 +11,7 @@
       "jsx": "react",
       "experimentalDecorators": true,
       "lib": [
-        "es2017",
+        "es2019",
         "es6",
         "dom"
       ]
@@ -27,7 +27,7 @@
     ],
     "compileOnSave": true,
     "lib": [
-      "es2017",
+      "es2019",
       "es6",
       "dom"
     ]

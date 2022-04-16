@@ -1,44 +1,28 @@
 import YAML from "yaml"
-import { Pair } from "yaml/types";
-import { Propable, Props } from "./Propable";
-import BasicProps from "./BasicProps";
-import Hookable from "./Hookable";
-
-const keyIndex=["id","class","vIn","vOut","props"];
+import { BasicProps } from "./Propable";
+import BasicGraphObject from "./BasicGraphObject";
 const idRestriction=/^\w+$/
 
-export default class Vertex implements Propable {
+export default class Vertex extends BasicGraphObject {
     id: string;
     class: string;
-    props: BasicProps;
     vIn: {[edgeType: string]: string[]};
     vOut: {[edgeType: string]: string[]};
-    hook: Hookable;
 
     constructor(id: string, vertexClass: string){
+        super()
         if(!idRestriction.test(id)) throw new Error(`invalid id:${id} - only alphanumeric and underscore allowed`);
         this.id = id;
         this.class = vertexClass;
     }
+
+    getTuple(type: "in"|"out"): {edgeType: string, vId: string}[] {
+        let et = type=="in"?this.vIn:this.vOut;
+        return Object.keys(et).map(x=>et[x].map(y=>{return {edgeType: x, vId: y}})).flat();
+    }
+
     getId(): string {
         return this.id;
-    }
-    setProp(key: string, value: string): void {
-        if(!this.props) this.props = new BasicProps(key, value);
-        else this.props.set(key,value);
-    }
-    getProp(key: string): string {
-        if(!this.props) return;
-        return this.props.get(key);
-    }
-    deleteProp(key: string): boolean {
-        if(!this.props) return false;
-        if(Object.keys(this.props.items).length==1 && typeof this.props.get(key) !== "undefined") 
-            return delete this.props;
-        return this.props.delete(key);
-    }
-    getProps(): Props {
-        return this.props;
     }
 
     connectTo(target:Vertex, edgeType: string="default") {
@@ -66,18 +50,7 @@ export default class Vertex implements Propable {
         if(this.vOut) Object.keys(this.vOut).forEach(key=>{
             this.vOut[key].sort()
         });
-        let tempHook = this.hook;
-        delete this.hook;
-        let result = YAML.stringify(this, {sortMapEntries: (a: Pair, b:Pair): number=>{
-            let a1 = keyIndex.indexOf(a.key.value);
-            let b1 = keyIndex.indexOf(b.key.value);
-            if(a1 > -1 && b1 > -1)
-                return a1-b1;
-            else if(a>b) return 1 
-                 else return -1
-        }});
-        this.hook = tempHook;
-        return result;
+        return super.serialize();
     }
 
     static deserialize(serialized:string): Vertex{
