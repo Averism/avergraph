@@ -16,7 +16,7 @@ export default class Vertex implements Propable {
     hook: Hookable;
 
     constructor(id: string, vertexClass: string){
-        if(!idRestriction.test(id)) throw `invalid id:${id} - only alphanumeric and underscore allowed`;
+        if(!idRestriction.test(id)) throw new Error(`invalid id:${id} - only alphanumeric and underscore allowed`);
         this.id = id;
         this.class = vertexClass;
     }
@@ -60,8 +60,12 @@ export default class Vertex implements Propable {
     }
 
     serialize(): string {
-        if(this.vIn) Object.keys(this.vIn).forEach(key=>this.vIn[key].sort());
-        if(this.vOut) Object.keys(this.vOut).forEach(key=>this.vOut[key].sort());
+        if(this.vIn) Object.keys(this.vIn).forEach(key=>{
+            this.vIn[key].sort()
+        });
+        if(this.vOut) Object.keys(this.vOut).forEach(key=>{
+            this.vOut[key].sort()
+        });
         let tempHook = this.hook;
         delete this.hook;
         let result = YAML.stringify(this, {sortMapEntries: (a: Pair, b:Pair): number=>{

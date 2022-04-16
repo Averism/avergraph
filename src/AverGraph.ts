@@ -24,19 +24,17 @@ export default class AverGraph implements Hookable {
             return this.createEdge(params[0], params[1], params[2]);
     }
     getVertex(option: getVertexOptions): Vertex{
-        if(!option) throw "option must not be null";
+        if(!option) throw new Error("option must not be null");
         if(typeof option.id == "string") return this.vertexById[option.id];
-        return;
     }
     getVertices(option: getVertexOptions): Vertex[]{
         return;
     }
     getEdge(option: getEdgeOptions): Edge{
-        if(!option) throw "option must not be null";
+        if(!option) throw new Error("option must not be null");
         if(typeof option.id == "string") return this.edgeById[option.id];
         if(typeof option.source == "string" || typeof option.target == "string" || typeof option.edgeType == "string") 
             return this.edgeById[`${option.source}-${option.edgeType}-${option.target}`];
-        return;
     }
     getEdges(option: getEdgeOptions): Edge[]{
         return;
