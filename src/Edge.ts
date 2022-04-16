@@ -1,18 +1,12 @@
-import YAML from "yaml"
-import { Pair } from "yaml/types";
-import BasicProps from "./BasicProps";
-import Hookable from "./Hookable";
-import { Propable, Props } from "./Propable";
+import BasicGraphObject from "./BasicGraphObject";
+import { BasicProps, Propable, Props } from "./Propable";
 import Vertex from "./Vertex";
+import YAML from "yaml";
 
-const keyIndex=["edgeType","source","target","props"];
-
-export default class Edge implements Propable {
+export default class Edge extends BasicGraphObject {
     source: string;
     target: string;
     edgeType: string;
-    props: BasicProps;
-    hook: Hookable;
     id() {
         return `${this.source}-${this.edgeType}-${this.target}`;
     }
@@ -21,6 +15,7 @@ export default class Edge implements Propable {
     }
 
     constructor(source: string | Vertex, target: string | Vertex, edgeType: string){
+        super();
         if (source instanceof Vertex) this.source = source.id;
         else this.source = source;
         if (target instanceof Vertex) this.target = target.id;
@@ -31,6 +26,7 @@ export default class Edge implements Propable {
     setProp(key: string, value: string): void {
         if(!this.props) this.props = new BasicProps(key, value);
         else this.props.set(key,value);
+        if(this.hook) this.hook.callHook("addProp",this,key);
     }
     getProp(key: string): string {
         if(!this.props) return;
@@ -40,6 +36,7 @@ export default class Edge implements Propable {
         if(!this.props) return false;
         if(Object.keys(this.props.items).length==1 && typeof this.props.get(key) !== "undefined") 
             return delete this.props;
+        if(this.hook) this.hook.callHook("removeProp",this,key);
         return this.props.delete(key);
     }
     getProps(): Props {
@@ -47,18 +44,7 @@ export default class Edge implements Propable {
     }
     
     serialize(): string {
-        let tempHook = this.hook;
-        delete this.hook;
-        let result = YAML.stringify(this, {sortMapEntries: (a: Pair, b:Pair): number=>{
-            let a1 = keyIndex.indexOf(a.key.value);
-            let b1 = keyIndex.indexOf(b.key.value);
-            if(a1 > -1 && b1 > -1)
-                return a1-b1;
-            else if(a>b) return 1 
-                 else return -1
-        }});
-        this.hook = tempHook;
-        return result;
+        return super.serialize();
     }
 
     static deserialize(serialized:string): Edge{
