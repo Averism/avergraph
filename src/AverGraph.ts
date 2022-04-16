@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 
 import path from "path";
 import Edge from "./Edge";
 import Hookable from "./Hookable";
+import { isPropable, Propable } from "./Propable";
 import Vertex from "./Vertex";
 
 export type getVertexOptions = {
@@ -18,10 +19,15 @@ export type getEdgeOptions = {
 export default class AverGraph implements Hookable {
     private vertexById: {[id: string]: Vertex} = {};
     private edgeById: {[id: string]: Edge} = {};
+    private propIndex: {[propKey: string]: Propable[]} = {};
+    private propValueIndex: {[propKey: string]: {[propValue: string]: Propable[]}} = {};
 
     callHook(fnName: string, ...params: any[]) {
         if(fnName == "connectTo" && params[0] instanceof Vertex && params[1] instanceof Vertex && typeof params[2] == "string")
             return this.createEdge(params[0], params[1], params[2]);
+        if(fnName == "addProp" && isPropable(params[0]) && typeof params[1] == "string" && typeof params[2] == "string"){
+            
+        }
     }
     getVertex(option: getVertexOptions): Vertex{
         if(!option) throw new Error("option must not be null");

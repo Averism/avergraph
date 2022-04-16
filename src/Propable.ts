@@ -11,3 +11,12 @@ export interface Propable {
     getProps(): Props;
     getId(): string;
 }
+
+export function isPropable(x: any): x is Propable {
+    if(typeof x.setProp != "function") return false;
+    if(typeof x.getProp != "function") return false;
+    if(typeof x.deleteProp != "function") return false;
+    if(typeof x.getProps != "function") return false;
+    if(typeof x.getId != "function") return false;
+    return true;
+}
