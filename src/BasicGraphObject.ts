@@ -1,5 +1,4 @@
 import { Pair } from "yaml/types";
-import Edge from "./Edge";
 import Hookable from "./Hookable";
 import { Propable, BasicProps, Props } from "./Propable";
 import YAML from "yaml";
