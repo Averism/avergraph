@@ -1,0 +1,34 @@
+{
+    "compilerOptions": {
+      "noImplicitAny": true,
+      "target": "es5",
+      "outDir": "temp",
+      "sourceMap": true,
+      "moduleResolution": "node",
+      "pretty": true,
+      "esModuleInterop": true,
+      "module": "commonjs",
+      "jsx": "react",
+      "experimentalDecorators": true,
+      "lib": [
+        "es2017",
+        "es6",
+        "dom"
+      ]
+    },
+    "include": [
+      "src/**/*",
+      "index.ts",
+      "test/*"
+    ],
+    "exclude": [
+      "node_modules",
+      "**/*.spec.ts"
+    ],
+    "compileOnSave": true,
+    "lib": [
+      "es2017",
+      "es6",
+      "dom"
+    ]
+  }
