@@ -76,7 +76,8 @@ describe("graph", ()=>{
         graph.createEdge("v6","v5","test");
         graph.createEdge("v2","v5","test");
         graph.createEdge("v1","v5","test");
-        viz(graph,"test.html");
+        viz(graph,join("test","temp","test.html"));
+        strictEqual(existsSync(join("test","temp","test.html")),true);
     });
     after(()=>{
         rimraf.sync(join("test","temp"));
