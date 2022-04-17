@@ -5,7 +5,7 @@ export default function viz(graph: AverGraph, path: string) {
     let v: string[] = graph.getVertices({idRegex: ".*"}).map(x=>`                {data: {id: "${x.getId()}"}}`)
     let e: string[] = graph.getEdges({idRegex: ".*"}).map(x=>`                {data: {id: "${x.getId()}", source: "${x.source}", target: "${x.target}", edgeType: "${x.edgeType}"}}`)
     let content = `<body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.21.1/cytoscape.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.21.1/cytoscape.min.js" integrity="sha512-H44mkyNG9R5Y8NDjFoZ0lnMGgxfsbfbuewUNJJjecVOUzR3n/JL8+UFc07pP74T5tA+aGOMKCwazdDYwoquE8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
         #cy {
             width: 100%;
