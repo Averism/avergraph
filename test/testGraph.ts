@@ -5,10 +5,12 @@ import AverGraph from "../src/AverGraph";
 import Edge from "../src/Edge";
 import rimraf from "rimraf";
 import Vertex from "../src/Vertex";
+import viz from "../src/viz";
 
 describe("graph", ()=>{
+    let graph: AverGraph;
     it("should create vertex and edges correctly", ()=>{
-        let graph = new AverGraph();
+        graph = new AverGraph();
         let v1 = graph.createVertex("v1", "default");
         let v2 = graph.createVertex("v2", "default");
         v1.connectTo(v2);
@@ -26,7 +28,7 @@ describe("graph", ()=>{
         strictEqual(graph.getVertices({}), undefined); 
     });
     it("should saves to files correctly", async ()=>{
-        let graph = new AverGraph();
+        graph = new AverGraph();
         let v1 = graph.createVertex("v1", "default");
         let v2 = graph.createVertex("v2", "default");
         let v3 = graph.createVertex("v3", "default");
@@ -43,7 +45,7 @@ describe("graph", ()=>{
         return Promise.resolve();
     });
     it("should load from files correctly", async ()=>{
-        let graph = new AverGraph();
+        graph = new AverGraph();
         graph.loadFromFiles(join("test","temp"));
         strictEqual(graph.getVertex({id: "v1"}) instanceof Vertex, true);
         strictEqual(graph.getVertex({id: "v2"}) instanceof Vertex, true);
@@ -54,7 +56,6 @@ describe("graph", ()=>{
         return Promise.resolve();
     });
     it("should search correctly", async ()=>{
-        let graph = new AverGraph();
         graph.loadFromFiles(join("test","temp"));
         graph.getVertex({id: "v1"}).setProp("p1","v1");
         graph.getVertex({id: "v2"}).setProp("p1","a");
@@ -64,6 +65,19 @@ describe("graph", ()=>{
         strictEqual(graph.getEdges({target: "v3"}).length,2);
         strictEqual(graph.getVertices({hasProps:["p1"], idRegex:"v."}).length,2);
         return Promise.resolve();
+    });
+    it("should be able visualized correctly", async ()=>{
+        graph.createVertex("v4", "default");
+        graph.createVertex("v5", "default");
+        graph.createVertex("v6", "default");
+        graph.createEdge("v4","v3","test");
+        graph.createEdge("v1","v4","test");
+        graph.createEdge("v5","v3","test");
+        graph.createEdge("v6","v5","test");
+        graph.createEdge("v2","v5","test");
+        graph.createEdge("v1","v5","test");
+        viz(graph,join("test","temp","test.html"));
+        strictEqual(existsSync(join("test","temp","test.html")),true);
     });
     after(()=>{
         rimraf.sync(join("test","temp"));

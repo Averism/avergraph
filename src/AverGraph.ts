@@ -139,8 +139,10 @@ export default class AverGraph implements Hookable {
         let v1 = source instanceof Vertex? source : this.vertexById[source];
         let v2 = target instanceof Vertex? target : this.vertexById[target];
         if(!v1 || !v2) throw new Error(`cannot create edge (${v1},${v2}) on uncreated vertex`);
+        if(typeof v1.vOut == "undefined") v1.vOut = {}
         if(typeof v1.vOut[edgeType] == "undefined") v1.vOut[edgeType] = [];
         if(v1.vOut[edgeType].indexOf(v2.getId())==-1) v1.vOut[edgeType].push(v2.getId())
+        if(typeof v2.vIn == "undefined") v2.vIn = {}
         if(typeof v2.vIn[edgeType] == "undefined") v2.vIn[edgeType] = [];
         if(v2.vIn[edgeType].indexOf(v1.getId())==-1) v2.vIn[edgeType].push(v1.getId())
         let e: Edge = new Edge(source, target, edgeType);
