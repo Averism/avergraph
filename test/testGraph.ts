@@ -5,11 +5,12 @@ import AverGraph from "../src/AverGraph";
 import Edge from "../src/Edge";
 import rimraf from "rimraf";
 import Vertex from "../src/Vertex";
-import viz from "../src/vizTemplate";
+import viz from "../src/viz";
 
 describe("graph", ()=>{
+    let graph: AverGraph;
     it("should create vertex and edges correctly", ()=>{
-        let graph = new AverGraph();
+        graph = new AverGraph();
         let v1 = graph.createVertex("v1", "default");
         let v2 = graph.createVertex("v2", "default");
         v1.connectTo(v2);
@@ -27,7 +28,7 @@ describe("graph", ()=>{
         strictEqual(graph.getVertices({}), undefined); 
     });
     it("should saves to files correctly", async ()=>{
-        let graph = new AverGraph();
+        graph = new AverGraph();
         let v1 = graph.createVertex("v1", "default");
         let v2 = graph.createVertex("v2", "default");
         let v3 = graph.createVertex("v3", "default");
@@ -43,7 +44,6 @@ describe("graph", ()=>{
         strictEqual(existsSync(join(tempTestPath,"edge","v2-default-v3.yml")),false);
         return Promise.resolve();
     });
-    let graph: AverGraph;
     it("should load from files correctly", async ()=>{
         graph = new AverGraph();
         graph.loadFromFiles(join("test","temp"));

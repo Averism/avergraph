@@ -2,8 +2,8 @@ import { writeFileSync } from "fs"
 import AverGraph from "./AverGraph"
 
 export default function viz(graph: AverGraph, path: string) { 
-    let v: string[] = graph.getVertices({idRegex: ".*"}).map(v=>`                {data: {id: "${v.getId()}"}}`)
-    let e: string[] = graph.getEdges({idRegex: ".*"}).map(e=>`                {data: {id: "${e.getId()}", source: "${e.source}", target: "${e.target}", edgeType: "${e.edgeType}"}}`)
+    let v: string[] = graph.getVertices({idRegex: ".*"}).map(x=>`                {data: {id: "${x.getId()}"}}`)
+    let e: string[] = graph.getEdges({idRegex: ".*"}).map(x=>`                {data: {id: "${x.getId()}", source: "${x.source}", target: "${x.target}", edgeType: "${x.edgeType}"}}`)
     let content = `<body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.21.1/cytoscape.min.js"></script>
     <style>
