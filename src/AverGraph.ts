@@ -3,12 +3,13 @@ import path from "path";
 import BasicGraphObject from "./BasicGraphObject";
 import Edge from "./Edge";
 import Hookable from "./Hookable";
-import { isPropable, Propable } from "./Propable";
+import { Clonable, isPropable, Propable } from "./Propable";
 import Vertex from "./Vertex";
 
 export type graphObjectOptions = {
     id?: string,
     idRegex?: string,
+    ids?: string[]
     hasProps?: string[],
     hasPropsWithValues?: {[labelName: string]: string}
 }
@@ -29,17 +30,18 @@ function intersect(a: any[], b: any[]){
     return base.filter(x=>other.has(x));
 }
 
-export default class AverGraph implements Hookable {
-    private vertexById: {[id: string]: Vertex} = {};
+export default class AverGraph implements Hookable, Clonable<AverGraph> {
+    vertexById: {[id: string]: Vertex} = {};
     private vertexByClass: {[id: string]: Vertex[]} = {};
-    private edgeById: {[id: string]: Edge} = {};
+    edgeById: {[id: string]: Edge} = {};
     private propIndex: {[propKey: string]: {[id: string]:Propable}} = {};
 
     private searchObjectById<T extends BasicGraphObject>(container: {[id: string]: T}, options: graphObjectOptions): T[] {
         if(options.id) return [container[options.id]];
+        if(options.ids) return options.ids.map(x=>container[x]).filter(x=>x);
         if(options.idRegex) {
             let pattern = new RegExp(options.idRegex)
-            return Object.keys(container).filter(x=>pattern.test(x)).map(x=>container[x]);
+            return Object.keys(container).filter(x=>pattern.test(x)).map(x=>container[x]).filter(x=>x);
         }
     }
 
@@ -80,6 +82,11 @@ export default class AverGraph implements Hookable {
             if(!this.propIndex[params[1]]) this.propIndex[params[1]] = {};
             delete this.propIndex[params[1]][params[0].getId()];
         }
+        if(fnName == "changeClass" && params[0] instanceof Vertex && typeof params[1] == "string"){
+            this.vertexByClass[params[0].class].splice(this.vertexByClass[params[0].class].indexOf(params[0]),1);
+            if(this.vertexByClass[params[1]]) this.vertexByClass[params[1]].push(params[0]);
+            else this.vertexByClass[params[1]] = [params[0]];
+        }
     }
     getVertex(option: getVertexOptions|string): Vertex{
         if(!option) throw new Error("option must not be null");
@@ -93,8 +100,8 @@ export default class AverGraph implements Hookable {
         if(!option) throw new Error("option must not be null");
         let result = this.searchObject<Vertex>(this.vertexById,option);
         if(option.class)
-            if(result) result = intersect(result, this.vertexByClass[option.class])
-            else result = this.vertexByClass[option.class];
+            if(result) result = intersect(result, this.vertexByClass[option.class].filter(x=>x))
+            else result = this.vertexByClass[option.class].filter(x=>x);
         return result;
     }
     getEdge(option: getEdgeOptions): Edge{
@@ -113,12 +120,12 @@ export default class AverGraph implements Hookable {
                 if(option.target) vo=vo.filter(y=>y==option.target)
                 return vo.map(y=>`${option.source}-${x}-${y}`)
             }).flat();
-            tempResult = t.map(x=>this.edgeById[x]);
+            tempResult = t.map(x=>this.edgeById[x]).filter(x=>x);
         }else if(option.target){
             let v = this.getVertex(option.target);
             let et = option.edgeType?[option.edgeType]:Object.keys(v.vIn);
             let t = et.map(x=>v.vIn[x].map(y=>`${y}-${x}-${option.target}`)).flat();
-            tempResult = t.map(x=>this.edgeById[x]);
+            tempResult = t.map(x=>this.edgeById[x]).filter(x=>x);
         }else if(option.edgeType){
             tempResult = this.searchObject<Edge>(this.edgeById,{idRegex: `-${option.edgeType}-`});
         }
@@ -149,6 +156,24 @@ export default class AverGraph implements Hookable {
         this.edgeById[e.id()] = e;
         e.hook=this;
         return e;
+    }
+    removeEdge(edge: string|Edge){
+        let e:Edge;
+        if(typeof edge == "string")  e = this.edgeById[edge];
+        else e = edge;
+        this.removeProppable(e);
+        delete this.edgeById[e.getId()];
+    }
+    removeVertex(vertex: string|Vertex){
+        let v:Vertex;
+        if(typeof vertex == "string")  v = this.vertexById[vertex];
+        else v = vertex;
+        this.removeProppable(v);
+        let edgeToRemove: Edge[] = [];
+        edgeToRemove = edgeToRemove.concat(this.getEdges({source: v.getId()}));
+        edgeToRemove = edgeToRemove.concat(this.getEdges({target: v.getId()}));
+        edgeToRemove.forEach(e=>this.removeEdge(e));
+        delete this.vertexById[v.getId()];
     }
     saveToFiles(basepath: string):void {
         for(let v of Object.values(this.vertexById) ) {
@@ -194,10 +219,36 @@ export default class AverGraph implements Hookable {
         }
         // end load from files
     }
+    
+    clone(): AverGraph {
+        let result = new AverGraph();
+        for(let v of Object.values(this.vertexById)) {
+            let v1 = result.createVertex(v.id, v.class);
+            v1.hook = result;
+            this.cloneProps(v,v1);
+        }
+        for(let e of Object.values(this.edgeById)) {
+            let e1 = result.createEdge(e.source, e.target, e.edgeType)
+            e1.hook = result;
+            this.cloneProps(e,e1);
+        }
+        return result;
+    }
+
+    private cloneProps(old1: Propable, new1: Propable){
+        if(!old1.getProps()) return;
+        for(let key of old1.getProps().keys()) new1.setProp(key, old1.getProp(key));
+    }
 
     private indexProp(o: Propable){
         for(let propKey of o.getProps().keys()){
             this.callHook("addProp",o,propKey);
+        }
+    }
+    private removeProppable(p: Propable) {
+        if(!p.getProps()) return;
+        for(let key of p.getProps().keys()){
+            p.deleteProp(key);
         }
     }
 }

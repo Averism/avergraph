@@ -43,6 +43,11 @@ export default class Vertex extends BasicGraphObject {
         if(this.hook) this.hook.callHook("connectTo",this,target,edgeType);
     }
 
+    changeClass(newClass: string){
+        if(this.hook) this.hook.callHook("changeClass",this,newClass);
+        this.class = newClass;
+    }
+
     serialize(): string {
         if(this.vIn) Object.keys(this.vIn).forEach(key=>{
             this.vIn[key].sort()
