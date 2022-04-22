@@ -1,5 +1,5 @@
 import YAML from "yaml"
-import { BasicProps } from "./Propable";
+import { BasicProps, Propable } from "./Propable";
 import BasicGraphObject from "./BasicGraphObject";
 const idRestriction=/^\w+$/
 
@@ -41,6 +41,11 @@ export default class Vertex extends BasicGraphObject {
             target.vIn[edgeType] = [this.id];
         }
         if(this.hook) this.hook.callHook("connectTo",this,target,edgeType);
+    }
+
+    changeClass(newClass: string){
+        if(this.hook) this.hook.callHook("changeClass",this,newClass);
+        this.class = newClass;
     }
 
     serialize(): string {
