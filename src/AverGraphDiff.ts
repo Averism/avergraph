@@ -1,5 +1,4 @@
 import AverGraph from "./AverGraph";
-import BasicGraphObject from "./BasicGraphObject";
 import Edge from "./Edge";
 import { Propable } from "./Propable";
 import Vertex from "./Vertex";
@@ -62,7 +61,7 @@ export default class AverGraphDiff extends AverGraph {
     // o1 will be guaranteed no undefined
     private diffObj(param: DiffParam): boolean {
         // console.log("diffing", o1?o1.getId():undefined, o2?o2.getId():undefined)
-        let {o1, o2, reverse, newO}= param;
+        let {o1, o2, reverse}= param;
         let isO1Undefined = typeof o1=="undefined" && typeof o2!="undefined";
         if(isO1Undefined) return this.switchDiffParams(this.diffObj.bind(this),param);
         let id = o1.getId();
@@ -101,7 +100,7 @@ export default class AverGraphDiff extends AverGraph {
     private diffVertex(param: DiffParam): {newO: Propable, changed: boolean} {            
         let vClass: string;
         let changed = false;
-        let {o1, o2, reverse, newO}= param;
+        let {o1, o2, reverse}= param;
         let id = o1.getId();
         if(! (o1 instanceof Vertex)) throw new Error("unexpected error, param must be instance of vertex")
         if(!(o2 instanceof Vertex) && o2) throw new Error("unexpected error, param must be instance of vertex")
@@ -127,13 +126,18 @@ export default class AverGraphDiff extends AverGraph {
             return false;
         if( bothIsDefined && typeof o1.getProps()=="undefined" && typeof o2.getProps()!="undefined") 
             return this.switchDiffParams(this.diffProps.bind(this), param)
+        let id = o1.getId();
         let keys: string[]=o1.getProps()?o1.getProps().keys():[];
-        for(let key of keys) 
-            hasChange = this.diffProp(key, o1, o2, reverse, newO) || hasChange;
+        for(let key of keys) {
+            let changing = this.diffProp(key, o1, o2, reverse, newO);
+            hasChange = changing || hasChange;
+        }
         keys=o2&&o2.getProps()?o2.getProps().keys():[];
         for(let key of keys) 
-            if(typeof this.diffInfo[`${reverse?o2.getId():o1.getId()}.${key}`] == "undefined")
-                hasChange = this.diffProp(key, o1, o2, reverse, newO) || hasChange;
+            if(typeof this.diffInfo[`${id}.${key}`] == "undefined"){
+                let changing = this.diffProp(key, o1, o2, reverse, newO);
+                hasChange = changing || hasChange;
+            }
         return hasChange;
     }
 
