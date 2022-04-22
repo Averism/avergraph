@@ -1,5 +1,5 @@
 import YAML from "yaml"
-import { BasicProps, Propable } from "./Propable";
+import { BasicProps } from "./Propable";
 import BasicGraphObject from "./BasicGraphObject";
 const idRestriction=/^\w+$/
 

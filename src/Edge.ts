@@ -1,5 +1,5 @@
 import BasicGraphObject from "./BasicGraphObject";
-import { BasicProps, Propable } from "./Propable";
+import { BasicProps } from "./Propable";
 import Vertex from "./Vertex";
 import YAML from "yaml";
 
