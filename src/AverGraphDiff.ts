@@ -65,11 +65,13 @@ export default class AverGraphDiff extends AverGraph {
         let isO1Undefined = typeof o1=="undefined" && typeof o2!="undefined";
         if(isO1Undefined) return this.switchDiffParams(this.diffObj.bind(this),param);
         let id = o1.getId();
+        let vid: string;
         let changed = false;
         if(o1 instanceof Vertex) {
             let res = this.diffVertex(param);
             param.newO = res.newO;
             changed = res.changed || changed;
+            vid = id + `::${o1.class}`
         } else if(o1 instanceof Edge) {
             param.newO = this.createEdge(o1.source,o1.target,o1.edgeType);
             if(!o1 || !o2) changed = true;
@@ -86,7 +88,7 @@ export default class AverGraphDiff extends AverGraph {
             this.diffInfo[id] = {
                 type: "add", 
                 before: undefined,
-                after: id
+                after: o1 instanceof Vertex?vid:id
             };
         } else {
             this.diffInfo[id] = {
@@ -172,3 +174,76 @@ export default class AverGraphDiff extends AverGraph {
         return false;
     }
 }
+
+export function applyGraphDiffTo(startingGraph: AverGraph, diff: DiffInfo) {
+    if(!diff || Object.keys(diff).length == 0) return;
+    let diffKeys = Object.keys(diff);
+    let vertexDiffKey = diffKeys.filter(x=>!x.includes("-") && !x.includes("."))
+    for(let key of vertexDiffKey) 
+        applyVertexNoDeleteDiff(startingGraph, key, diff[key]);
+    let vertexPropsDiffKey = diffKeys.filter(x=>!x.includes("-") && x.includes("."))
+    for(let key of vertexPropsDiffKey) 
+        applyPropsDiff(startingGraph, key, diff[key]);
+    let edgeDiffKey = diffKeys.filter(x=>x.includes("-") && !x.includes("."))
+    for(let key of edgeDiffKey) 
+        applyEdgeDiff(startingGraph, key, diff[key]);
+    let edgePropsDiffKey = diffKeys.filter(x=>x.includes("-") && x.includes("."))
+    for(let key of edgePropsDiffKey) 
+        applyPropsDiff(startingGraph, key, diff[key]);
+    for(let key of vertexDiffKey) 
+        applyVertexDeleteDiff(startingGraph, key, diff[key]);
+}
+
+function applyVertexNoDeleteDiff(startingGraph: AverGraph, id: string, diff: DiffChange) {
+    // console.log(id,diff)
+    let v: Vertex = startingGraph.getVertex(id);
+    if(id.includes("::")) {
+        let vId = id.split("::")[0];
+        v = startingGraph.getVertex(vId);
+        // console.log(vId, cls, v)
+        if(diff.before != v.class) throw new Error(`diff conflict! expected class to be ${diff.before} got ${v.class}`);
+        v.changeClass(diff.after);
+        return;
+    }
+    if(diff.type == "add") {
+        let cls = diff.after.split("::")[1];
+        startingGraph.createVertex(id,cls);
+        return;
+    }
+}
+
+function applyVertexDeleteDiff(startingGraph: AverGraph, id: string, diff: DiffChange) {
+    if(diff.type == "remove") {
+        startingGraph.removeVertex(id);
+        return;
+    }
+}
+
+function applyPropsDiff(startingGraph: AverGraph, key: string, diff: DiffChange) {
+    let splitId = key.split(".");
+    let pId = splitId[0];
+    let propKey = splitId[1];
+    let p: Propable = startingGraph.getVertex(pId) || startingGraph.getEdge({id: pId});
+    if(diff.type == "add" || diff.type == "modify") {
+        if(diff.before != p.getProp(propKey)) 
+            throw new Error(`diff conflict! expected prop ${propKey} value to be ${diff.before} got ${p.getProp(propKey)}`);
+        p.setProp(propKey, diff.after);
+        return;
+    }
+    if(diff.type == "remove") {
+        p.deleteProp(propKey)
+        return;
+    }
+}
+function applyEdgeDiff(startingGraph: AverGraph, key: string, diff: DiffChange) {
+    let[source,edgeType,target] = key.split('-');
+    if(diff.type == "add" ) {
+        startingGraph.createEdge(source,target,edgeType);
+        return;
+    }
+    if(diff.type == "remove") {
+        startingGraph.removeEdge(key);
+        return;
+    }
+}
+
