@@ -103,7 +103,7 @@ export default class Runner {
     async runNode(graph: AverGraph, node: Vertex, param: RunnerParam): Promise<any>{
         let actionType = node.getProp("actionType");
         switch(actionType){
-            case "evalScript": return this.evalScript(graph, node, param);
+            case "evalScript": return this.evalScript(node, param);
             case "runTask": return this.runTask(graph, node, param);
             case "noop": return;
         }
@@ -139,7 +139,7 @@ export default class Runner {
         return evaluate(condition, context);
     }
 
-    private async evalScript(graph: AverGraph, node: Vertex, param: RunnerParam): Promise<any>{
+    private async evalScript(node: Vertex, param: RunnerParam): Promise<any>{
         let script = node.getProp("script");
         if(!script) throw new Error("script is undefined for node "+node.getId());
         let result = evaluate(script, param.globalVar);
@@ -216,6 +216,7 @@ export default class Runner {
         let versions = Object.keys(this.capability[capability]).map(Number);
         let filteredVersions = versions.filter(x=>versionStart<=x && versionEnd>=x)
         if(filteredVersions.length == 0) return -1;
-        return filteredVersions.sort().reverse()[0];
+        filteredVersions.sort((a,b)=>a-b);
+        return filteredVersions.reverse()[0];
     }
 }

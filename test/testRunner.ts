@@ -95,7 +95,6 @@ describe("Runner", ()=>{
         await r.run(param);
         strictEqual(param.globalVar["res"],true
         );
-        viz(g,"temp.html")
 
         return;
     })

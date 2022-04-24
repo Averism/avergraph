@@ -208,14 +208,12 @@ function applyVertexNoDeleteDiff(startingGraph: AverGraph, id: string, diff: Dif
     if(diff.type == "add") {
         let cls = diff.after.split("::")[1];
         startingGraph.createVertex(id,cls);
-        return;
     }
 }
 
 function applyVertexDeleteDiff(startingGraph: AverGraph, id: string, diff: DiffChange) {
     if(diff.type == "remove") {
         startingGraph.removeVertex(id);
-        return;
     }
 }
 
@@ -232,7 +230,6 @@ function applyPropsDiff(startingGraph: AverGraph, key: string, diff: DiffChange)
     }
     if(diff.type == "remove") {
         p.deleteProp(propKey)
-        return;
     }
 }
 function applyEdgeDiff(startingGraph: AverGraph, key: string, diff: DiffChange) {
@@ -243,7 +240,6 @@ function applyEdgeDiff(startingGraph: AverGraph, key: string, diff: DiffChange) 
     }
     if(diff.type == "remove") {
         startingGraph.removeEdge(key);
-        return;
     }
 }
 
