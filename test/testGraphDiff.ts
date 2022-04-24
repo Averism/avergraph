@@ -66,16 +66,18 @@ describe("graphdiff", ()=>{
         let g3 = g1.clone();
         applyGraphDiffTo(g3,graphDiff.diffInfo);
         for(let v of Object.values(g2.vertexById)){
-            strictEqual(v.serialize(),g3.getVertex(v.getId()).serialize())
+            strictEqual(v.class,g3.getVertex(v.getId()).class)
+            deepStrictEqual(v.getProps(),g3.getVertex(v.getId()).getProps())
         }
         for(let v of Object.values(g3.vertexById)){
-            strictEqual(v.serialize(),g2.getVertex(v.getId()).serialize())
+            strictEqual(v.class,g2.getVertex(v.getId()).class)
+            deepStrictEqual(v.getProps(),g2.getVertex(v.getId()).getProps())
         }
         for(let e of Object.values(g2.edgeById)){
-            strictEqual(e.serialize(),g3.edgeById[e.getId()].serialize())
+            deepStrictEqual(e.getProps(),g3.edgeById[e.getId()].getProps())
         }
         for(let e of Object.values(g3.edgeById)){
-            strictEqual(e.serialize(),g2.edgeById[e.getId()].serialize())
+            deepStrictEqual(e.getProps(),g2.edgeById[e.getId()].getProps())
         }
     });
     

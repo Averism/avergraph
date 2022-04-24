@@ -1,7 +1,5 @@
 import BasicGraphObject from "./BasicGraphObject";
-import { BasicProps } from "./Propable";
 import Vertex from "./Vertex";
-import YAML from "yaml";
 
 export default class Edge extends BasicGraphObject {
     source: string;
@@ -21,19 +19,5 @@ export default class Edge extends BasicGraphObject {
         if (target instanceof Vertex) this.target = target.id;
         else this.target = target;
         this.edgeType = edgeType;
-    }
-    
-    serialize(): string {
-        return super.serialize();
-    }
-
-    static deserialize(serialized:string): Edge{
-        let o = YAML.parse(serialized);
-        let result = new Edge(o.source, o.target, o.edgeType);
-        if(o.props) {
-            result.props = new BasicProps(null,null);
-            result.props.items = o.props.items;
-        }
-        return result;
     }
 }
