@@ -49,7 +49,6 @@ export default class YmlSerializer extends GraphSerializer {
         }
         if(rows.length > 0){
             parser(graph, rows);
-            rows = [];
         }
     }
 

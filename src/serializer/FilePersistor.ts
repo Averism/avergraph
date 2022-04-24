@@ -22,9 +22,9 @@ export default class FilePersistor implements PersistanceAccessor {
     }
     load(key: string[]): Promise<KeyValuePersistance> {
         let v = readFile(resolve(this.basePath,...key));
-        return new Promise((resolve, reject)=>{
-            v.then(x=>{resolve({key, value: x.toString()})})
-            .catch(e=>reject(e))
+        return new Promise((res, rej)=>{
+            v.then(x=>{res({key, value: x.toString()})})
+            .catch(e=>rej(e))
         });
     }
     async getKeys(): Promise<string[][]> {

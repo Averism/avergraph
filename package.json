@@ -21,6 +21,5 @@
   },
   "license": "GPL-3.0",
   "dependencies": {
-    "yaml": "^1.10.2"
   }
 }

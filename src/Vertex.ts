@@ -1,5 +1,3 @@
-import YAML from "yaml"
-import { BasicProps } from "./Propable";
 import BasicGraphObject from "./BasicGraphObject";
 const idRestriction=/^\w+$/
 
@@ -47,26 +45,4 @@ export default class Vertex extends BasicGraphObject {
         if(this.hook) this.hook.callHook("changeClass",this,newClass);
         this.class = newClass;
     }
-
-    // serialize(): string {
-    //     if(this.vIn) Object.keys(this.vIn).forEach(key=>{
-    //         this.vIn[key].sort()
-    //     });
-    //     if(this.vOut) Object.keys(this.vOut).forEach(key=>{
-    //         this.vOut[key].sort()
-    //     });
-    //     return super.serialize();
-    // }
-
-    // static deserialize(serialized:string): Vertex{
-    //     let o = YAML.parse(serialized);
-    //     let result = new Vertex(o.id, o.class);
-    //     if(o.vIn) result.vIn = o.vIn;
-    //     if(o.vOut) result.vOut = o.vOut;
-    //     if(o.props) {
-    //         result.props = new BasicProps(null,null);
-    //         result.props.items = o.props.items;
-    //     }
-    //     return result;
-    // }
 }
