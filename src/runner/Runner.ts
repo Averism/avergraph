@@ -216,7 +216,7 @@ export default class Runner {
         let versions = Object.keys(this.capability[capability]).map(Number);
         let filteredVersions = versions.filter(x=>versionStart<=x && versionEnd>=x)
         if(filteredVersions.length == 0) return -1;
-        filteredVersions.sort((a,b)=>a-b);
-        return filteredVersions.reverse()[0];
+        filteredVersions.sort((a,b)=>b-a);
+        return filteredVersions[0];
     }
 }

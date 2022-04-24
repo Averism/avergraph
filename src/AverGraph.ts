@@ -111,34 +111,38 @@ export default class AverGraph implements Hookable, Clonable<AverGraph> {
     getEdges(option: getEdgeOptions): Edge[]{
         if(!option) throw new Error("option must not be null");
         let result = this.searchObject<Edge>(this.edgeById,option);
-        let tempResult: Edge[] = this.getEdgesByField(option);
+        let tempResult: Edge[];
+        if(option.source){
+            tempResult = this.getEdgesBySource(option);
+        }else if(option.target){
+            tempResult = this.getEdgesByTarget(option)
+        }else if(option.edgeType){
+            tempResult = this.searchObject<Edge>(this.edgeById,{idRegex: `-${option.edgeType}-`});
+        }
         if(tempResult)
             if(result) result = intersect(result, tempResult)
             else result = tempResult;
         return result;
     }
-    private getEdgesByField(option: getEdgeOptions):Edge[]{
-        if(option.source){
-            let v = this.getVertex(option.source);
-            if(!v.vOut) return [];
-            let et = option.edgeType?[option.edgeType]:Object.keys(v.vOut);
-            if(et.length == 1 && option.target) 
-                return [this.edgeById[`${option.source}-${et[0]}-${option.target}`]]
-            let t = et.map(x=>{
-                let vo = v.vOut[x];
-                if(option.target) vo=vo.filter(y=>y==option.target)
-                return vo.map(y=>`${option.source}-${x}-${y}`)
-            }).flat();
-            return t.map(x=>this.edgeById[x]).filter(x=>x);
-        }else if(option.target){
-            let v = this.getVertex(option.target);
-            if(!v.vIn) return [];
-            let et = option.edgeType?[option.edgeType]:Object.keys(v.vIn);
-            let t = et.map(x=>v.vIn[x].map(y=>`${y}-${x}-${option.target}`)).flat();
-            return t.map(x=>this.edgeById[x]).filter(x=>x);
-        }else if(option.edgeType){
-            return this.searchObject<Edge>(this.edgeById,{idRegex: `-${option.edgeType}-`});
-        }
+    private getEdgesByTarget(option: getEdgeOptions):Edge[]{
+        let v = this.getVertex(option.target);
+        if(!v.vIn) return [];
+        let et = option.edgeType?[option.edgeType]:Object.keys(v.vIn);
+        let t = et.map(x=>v.vIn[x].map(y=>`${y}-${x}-${option.target}`)).flat();
+        return t.map(x=>this.edgeById[x]).filter(x=>x);
+    }
+    private getEdgesBySource(option: getEdgeOptions):Edge[]{
+        let v = this.getVertex(option.source);
+        if(!v.vOut) return [];
+        let et = option.edgeType?[option.edgeType]:Object.keys(v.vOut);
+        if(et.length == 1 && option.target) 
+            return [this.edgeById[`${option.source}-${et[0]}-${option.target}`]]
+        let t = et.map(x=>{
+            let vo = v.vOut[x];
+            if(option.target) vo=vo.filter(y=>y==option.target)
+            return vo.map(y=>`${option.source}-${x}-${y}`)
+        }).flat();
+        return t.map(x=>this.edgeById[x]).filter(x=>x);
     }
     createVertex(id: string, vertexClass: string): Vertex{
         let v: Vertex = new Vertex(id, vertexClass);
