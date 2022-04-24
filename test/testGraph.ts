@@ -1,21 +1,24 @@
-import { strictEqual, throws } from "assert";
-import { existsSync } from "fs";
+import { deepStrictEqual, strictEqual, throws } from "assert";
+import { existsSync, mkdirSync } from "fs";
 import { join } from "path";
 import AverGraph from "../src/AverGraph";
 import Edge from "../src/Edge";
 import rimraf from "rimraf";
 import Vertex from "../src/Vertex";
 import viz from "../src/viz";
+import YmlSerializer from "../src/serializer/YmlSerializer";
+import FilePersistor from "../src/serializer/FilePersistor";
 
 describe("graph", ()=>{
     let graph: AverGraph;
+    let serializedGraph: string;
     it("should create vertex and edges correctly", ()=>{
         graph = new AverGraph();
         let v1 = graph.createVertex("v1", "default");
         let v2 = graph.createVertex("v2", "default");
         v1.connectTo(v2);
         let e1 = graph.getEdge({source: v1.id, target: v2.id, edgeType: "default"});
-        strictEqual(graph.getVertex({id: v1.id}).serialize(), v1.serialize()); 
+        deepStrictEqual(graph.getVertex({id: v1.id}), v1); 
         strictEqual(e1 instanceof Edge, true);
 
         //negative tests
@@ -27,7 +30,7 @@ describe("graph", ()=>{
         //not yet implemented
         strictEqual(graph.getVertices({}), undefined); 
     });
-    it("should saves to files correctly", async ()=>{
+    it("should serialize correctly", async ()=>{
         graph = new AverGraph();
         let v1 = graph.createVertex("v1", "default");
         let v2 = graph.createVertex("v2", "default");
@@ -36,17 +39,22 @@ describe("graph", ()=>{
         v2.connectTo(v3);
         graph.getEdge({source: v1.id, target: v2.id, edgeType: "default"}).setProp("p1","val1");
         let tempTestPath = join("test","temp");
-        graph.saveToFiles(tempTestPath);
-        strictEqual(existsSync(join(tempTestPath,"vertex","v1.yml")),true);
-        strictEqual(existsSync(join(tempTestPath,"vertex","v2.yml")),true);
-        strictEqual(existsSync(join(tempTestPath,"vertex","v3.yml")),true);
-        strictEqual(existsSync(join(tempTestPath,"edge","v1-default-v2.yml")),true);
-        strictEqual(existsSync(join(tempTestPath,"edge","v2-default-v3.yml")),false);
+        let serializer = new YmlSerializer(new FilePersistor(tempTestPath));
+        serializedGraph = serializer.serialize(graph);
+        await serializer.persist(graph);
+        strictEqual(existsSync(join(tempTestPath,"vertex","v1")),true);
+        strictEqual(existsSync(join(tempTestPath,"vertex","v2")),true);
+        strictEqual(existsSync(join(tempTestPath,"vertex","v3")),true);
+        strictEqual(existsSync(join(tempTestPath,"edge","v1-default-v2")),true);
+        strictEqual(existsSync(join(tempTestPath,"edge","v2-default-v3")),true);
         return Promise.resolve();
     });
+
+
     it("should load from files correctly", async ()=>{
-        graph = new AverGraph();
-        graph.loadFromFiles(join("test","temp"));
+        let tempTestPath = join("test","temp");
+        let serializer = new YmlSerializer(new FilePersistor(tempTestPath))
+        graph = await serializer.load();
         strictEqual(graph.getVertex({id: "v1"}) instanceof Vertex, true);
         strictEqual(graph.getVertex({id: "v2"}) instanceof Vertex, true);
         strictEqual(graph.getVertex({id: "v3"}) instanceof Vertex, true);
@@ -55,8 +63,29 @@ describe("graph", ()=>{
         strictEqual(graph.getEdge({source: "v1", target: "v2", edgeType: "default"}).getProp("p1"), "val1");
         return Promise.resolve();
     });
+
+    it("should deserialize correctly", async ()=>{
+        let tempTestPath = join("test","temp");
+        let serializer = new YmlSerializer(new FilePersistor(tempTestPath))
+        graph = serializer.deserialize(serializedGraph);
+        strictEqual(graph.getVertex({id: "v1"}) instanceof Vertex, true);
+        strictEqual(graph.getVertex({id: "v2"}) instanceof Vertex, true);
+        strictEqual(graph.getVertex({id: "v3"}) instanceof Vertex, true);
+        strictEqual(graph.getEdge({source: "v1", target: "v2", edgeType: "default"}) instanceof Edge, true);
+        strictEqual(graph.getEdge({source: "v2", target: "v3", edgeType: "default"}) instanceof Edge, true);
+        strictEqual(graph.getEdge({source: "v1", target: "v2", edgeType: "default"}).getProp("p1"), "val1");
+        return Promise.resolve();
+    });
+
     it("should search correctly", async ()=>{
-        graph.loadFromFiles(join("test","temp"));
+        graph = new AverGraph();
+        let v1 = graph.createVertex("v1", "default");
+        let v2 = graph.createVertex("v2", "default");
+        let v3 = graph.createVertex("v3", "default");
+        v1.connectTo(v2);
+        v2.connectTo(v3);
+        graph.getEdge({source: v1.id, target: v2.id, edgeType: "default"}).setProp("p1","val1");
+        let tempTestPath = join("test","temp");
         graph.getVertex({id: "v1"}).setProp("p1","v1");
         graph.getVertex({id: "v2"}).setProp("p1","a");
         graph.createEdge("v1","v3","test");
@@ -66,6 +95,7 @@ describe("graph", ()=>{
         strictEqual(graph.getVertices({hasProps:["p1"], idRegex:"v."}).length,2);
         return Promise.resolve();
     });
+
     it("should be able visualized correctly", async ()=>{
         graph.createVertex("v4", "default");
         graph.createVertex("v5", "default");
@@ -79,6 +109,7 @@ describe("graph", ()=>{
         viz(graph,join("test","temp","test.html"));
         strictEqual(existsSync(join("test","temp","test.html")),true);
     });
+    
     after(()=>{
         rimraf.sync(join("test","temp"));
     })

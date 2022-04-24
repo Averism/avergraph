@@ -28,18 +28,18 @@ export default abstract class BasicGraphObject implements Propable {
         return this.props;
     }
     abstract getId(): string;
-    serialize(): string {
-        let tempHook = this.hook;
-        delete this.hook;
-        let result = YAML.stringify(this, {sortMapEntries: (a: Pair, b:Pair): number=>{
-            let a1 = keyIndex.indexOf(a.key.value);
-            let b1 = keyIndex.indexOf(b.key.value);
-            if(a1 > -1 && b1 > -1)
-                return a1-b1;
-            else if(a>b) return 1 
-                 else return -1
-        }});
-        this.hook = tempHook;
-        return result;
-    }
+    // serialize(): string {
+    //     let tempHook = this.hook;
+    //     delete this.hook;
+    //     let result = YAML.stringify(this, {sortMapEntries: (a: Pair, b:Pair): number=>{
+    //         let a1 = keyIndex.indexOf(a.key.value);
+    //         let b1 = keyIndex.indexOf(b.key.value);
+    //         if(a1 > -1 && b1 > -1)
+    //             return a1-b1;
+    //         else if(a>b) return 1 
+    //              else return -1
+    //     }});
+    //     this.hook = tempHook;
+    //     return result;
+    // }
 }

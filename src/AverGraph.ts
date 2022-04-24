@@ -191,50 +191,50 @@ export default class AverGraph implements Hookable, Clonable<AverGraph> {
         edgeToRemove.forEach(e=>this.removeEdge(e));
         delete this.vertexById[v.getId()];
     }
-    saveToFiles(basepath: string):void {
-        for(let v of Object.values(this.vertexById) ) {
-            let content = v.serialize();
-            if(!existsSync(basepath)) mkdirSync(basepath)
-            if(!existsSync(path.join(basepath,"vertex"))) mkdirSync(path.join(basepath,"vertex"))
-            writeFileSync(path.join(basepath,"vertex",v.id+".yml"),content);
-        }
-        for(let e of Object.values(this.edgeById) ) {
-            if(!e.props) continue;
-            let content = e.serialize();
-            if(!existsSync(basepath)) mkdirSync(basepath)
-            if(!existsSync(path.join(basepath,"edge"))) mkdirSync(path.join(basepath,"edge"))
-            writeFileSync(path.join(basepath,"edge",e.id()+".yml"),content);
-        }
-    }
-    loadFromFiles(basepath: string): void {
-        let vFiles = readdirSync(path.join(basepath,"vertex"));
-        for(let vFile of vFiles) {
-            let v = Vertex.deserialize(readFileSync(path.join(basepath,"vertex",vFile)).toString());
-            this.vertexById[v.getId()] = v;
-            v.hook=this;
-        }
-        let eFiles = readdirSync(path.join(basepath,"edge"));
-        for(let eFile of eFiles) {
-            let e = Edge.deserialize(readFileSync(path.join(basepath,"edge",eFile)).toString());
-            this.edgeById[e.getId()] = e;
-            e.hook=this;
-        }
-        for(let v of Object.values(this.vertexById)) {
-            if(v.getProps())
-                this.indexProp(v);
-            if(!v.vOut) continue;
-            let tuple = v.getTuple("out");
-            for(let t of tuple){
-                let e = this.edgeById[`${v.getId()}-${t.edgeType}-${t.vId}`];
-                if(typeof e == "undefined")
-                    e = this.createEdge(v.getId(),t.vId,t.edgeType);
-                if(e.getProps()){
-                    this.indexProp(e);
-                }
-            }
-        }
-        // end load from files
-    }
+    // saveToFiles(basepath: string):void {
+    //     for(let v of Object.values(this.vertexById) ) {
+    //         let content = v.serialize();
+    //         if(!existsSync(basepath)) mkdirSync(basepath)
+    //         if(!existsSync(path.join(basepath,"vertex"))) mkdirSync(path.join(basepath,"vertex"))
+    //         writeFileSync(path.join(basepath,"vertex",v.id+".yml"),content);
+    //     }
+    //     for(let e of Object.values(this.edgeById) ) {
+    //         if(!e.props) continue;
+    //         let content = e.serialize();
+    //         if(!existsSync(basepath)) mkdirSync(basepath)
+    //         if(!existsSync(path.join(basepath,"edge"))) mkdirSync(path.join(basepath,"edge"))
+    //         writeFileSync(path.join(basepath,"edge",e.id()+".yml"),content);
+    //     }
+    // }
+    // loadFromFiles(basepath: string): void {
+    //     let vFiles = readdirSync(path.join(basepath,"vertex"));
+    //     for(let vFile of vFiles) {
+    //         let v = Vertex.deserialize(readFileSync(path.join(basepath,"vertex",vFile)).toString());
+    //         this.vertexById[v.getId()] = v;
+    //         v.hook=this;
+    //     }
+    //     let eFiles = readdirSync(path.join(basepath,"edge"));
+    //     for(let eFile of eFiles) {
+    //         let e = Edge.deserialize(readFileSync(path.join(basepath,"edge",eFile)).toString());
+    //         this.edgeById[e.getId()] = e;
+    //         e.hook=this;
+    //     }
+    //     for(let v of Object.values(this.vertexById)) {
+    //         if(v.getProps())
+    //             this.indexProp(v);
+    //         if(!v.vOut) continue;
+    //         let tuple = v.getTuple("out");
+    //         for(let t of tuple){
+    //             let e = this.edgeById[`${v.getId()}-${t.edgeType}-${t.vId}`];
+    //             if(typeof e == "undefined")
+    //                 e = this.createEdge(v.getId(),t.vId,t.edgeType);
+    //             if(e.getProps()){
+    //                 this.indexProp(e);
+    //             }
+    //         }
+    //     }
+    //     // end load from files
+    // }
     
     clone(): AverGraph {
         let result = new AverGraph();

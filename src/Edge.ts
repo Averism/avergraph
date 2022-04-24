@@ -23,17 +23,17 @@ export default class Edge extends BasicGraphObject {
         this.edgeType = edgeType;
     }
     
-    serialize(): string {
-        return super.serialize();
-    }
+    // serialize(): string {
+    //     return super.serialize();
+    // }
 
-    static deserialize(serialized:string): Edge{
-        let o = YAML.parse(serialized);
-        let result = new Edge(o.source, o.target, o.edgeType);
-        if(o.props) {
-            result.props = new BasicProps(null,null);
-            result.props.items = o.props.items;
-        }
-        return result;
-    }
+    // static deserialize(serialized:string): Edge{
+    //     let o = YAML.parse(serialized);
+    //     let result = new Edge(o.source, o.target, o.edgeType);
+    //     if(o.props) {
+    //         result.props = new BasicProps(null,null);
+    //         result.props.items = o.props.items;
+    //     }
+    //     return result;
+    // }
 }
