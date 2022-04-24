@@ -62,7 +62,7 @@ export default class AverGraph implements Hookable, Clonable<AverGraph> {
 
     private searchObject<T extends BasicGraphObject>(container: {[id: string]: T}, options: graphObjectOptions): T[] {
         let result: T[];
-        if(options.id || options.idRegex) result = this.searchObjectById(container, options);
+        if(options.id || options.ids || options.idRegex) result = this.searchObjectById(container, options);
         if(options.hasProps || options.hasPropsWithValues){
             let tempResult = this.searchObjectByProps(container,options);
             if(result) result = intersect(result, tempResult);
@@ -113,19 +113,9 @@ export default class AverGraph implements Hookable, Clonable<AverGraph> {
         let result = this.searchObject<Edge>(this.edgeById,option);
         let tempResult: Edge[];
         if(option.source){
-            let v = this.getVertex(option.source);
-            let et = option.edgeType?[option.edgeType]:Object.keys(v.vOut);
-            let t = et.map(x=>{
-                let vo = v.vOut[x];
-                if(option.target) vo=vo.filter(y=>y==option.target)
-                return vo.map(y=>`${option.source}-${x}-${y}`)
-            }).flat();
-            tempResult = t.map(x=>this.edgeById[x]).filter(x=>x);
+            tempResult = this.getEdgesBySource(option);
         }else if(option.target){
-            let v = this.getVertex(option.target);
-            let et = option.edgeType?[option.edgeType]:Object.keys(v.vIn);
-            let t = et.map(x=>v.vIn[x].map(y=>`${y}-${x}-${option.target}`)).flat();
-            tempResult = t.map(x=>this.edgeById[x]).filter(x=>x);
+            tempResult = this.getEdgesByTarget(option)
         }else if(option.edgeType){
             tempResult = this.searchObject<Edge>(this.edgeById,{idRegex: `-${option.edgeType}-`});
         }
@@ -133,6 +123,26 @@ export default class AverGraph implements Hookable, Clonable<AverGraph> {
             if(result) result = intersect(result, tempResult)
             else result = tempResult;
         return result;
+    }
+    private getEdgesByTarget(option: getEdgeOptions):Edge[]{
+        let v = this.getVertex(option.target);
+        if(!v.vIn) return [];
+        let et = option.edgeType?[option.edgeType]:Object.keys(v.vIn);
+        let t = et.map(x=>v.vIn[x].map(y=>`${y}-${x}-${option.target}`)).flat();
+        return t.map(x=>this.edgeById[x]).filter(x=>x);
+    }
+    private getEdgesBySource(option: getEdgeOptions):Edge[]{
+        let v = this.getVertex(option.source);
+        if(!v.vOut) return [];
+        let et = option.edgeType?[option.edgeType]:Object.keys(v.vOut);
+        if(et.length == 1 && option.target) 
+            return [this.edgeById[`${option.source}-${et[0]}-${option.target}`]]
+        let t = et.map(x=>{
+            let vo = v.vOut[x];
+            if(option.target) vo=vo.filter(y=>y==option.target)
+            return vo.map(y=>`${option.source}-${x}-${y}`)
+        }).flat();
+        return t.map(x=>this.edgeById[x]).filter(x=>x);
     }
     createVertex(id: string, vertexClass: string): Vertex{
         let v: Vertex = new Vertex(id, vertexClass);
@@ -161,6 +171,12 @@ export default class AverGraph implements Hookable, Clonable<AverGraph> {
         let e:Edge;
         if(typeof edge == "string")  e = this.edgeById[edge];
         else e = edge;
+        let source = this.getVertex(e.source);
+        let target = this.getVertex(e.target);
+        let vOut = source.vOut[e.edgeType];
+        let vIn = target.vIn[e.edgeType];
+        vOut.splice(vOut.indexOf(e.target),1);
+        vIn.splice(vIn.indexOf(e.source),1);
         this.removeProppable(e);
         delete this.edgeById[e.getId()];
     }
