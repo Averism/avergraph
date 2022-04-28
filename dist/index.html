@@ -1,0 +1,27 @@
+<html>
+    <head>
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script defer src="bundle.js"></script><link href="main.css" rel="stylesheet"></head>
+    <body>
+
+        <ul id="slide-out" class="sidenav">
+          <li><a href="#!"><i class="material-icons">cloud</i>First Link With Icon</a></li>
+          <li><a href="#!">Second Link</a></li>
+          <li><div class="divider"></div></li>
+          <li><a class="subheader">Subheader</a></li>
+          <li><a class="waves-effect" href="#!">Third Link With Waves</a></li>
+        </ul>
+        <nav>
+            <div class="nav-wrapper">
+                <a href="#" class="brand-logo" data-target="slide-out" onclick="ag.showSidenav()">&nbsp;☰</a>
+                <a href="#" class="brand-logo center">Avergraph UI</a>
+                <ul id="nav-mobile" class="right hide-on-med-and-down">
+                    <li><a href="javascript:void(0)" onclick="ag.resetCy()">new</a></li>
+                    <li><a href="javascript:void(0)">save</a></li>
+                    <li><a href="javascript:void(0)">load</a></li>
+                </ul>
+            </div>
+        </nav>
+        <div id="cy"></div>
+    </body>
+</html>

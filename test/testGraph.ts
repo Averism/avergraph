@@ -66,6 +66,7 @@ describe("graph", ()=>{
 
     it("should deserialize correctly", async ()=>{
         let tempTestPath = join("test","temp");
+        console.log(serializedGraph)
         let serializer = new YmlSerializer(new FilePersistor(tempTestPath))
         graph = serializer.deserialize(serializedGraph);
         strictEqual(graph.getVertex({id: "v1"}) instanceof Vertex, true);

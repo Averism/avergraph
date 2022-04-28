@@ -1,4 +1,3 @@
-import { strictEqual } from "assert";
 import AverGraph from "../AverGraph";
 import Edge from "../Edge";
 import { Propable } from "../Propable";
@@ -11,13 +10,13 @@ export default class YmlSerializer extends GraphSerializer {
     deserialize(data: string): AverGraph {
         let graph = new AverGraph();
         let [verticesString, edgeString] = data.split("\nedges:\n");
-        strictEqual(verticesString.startsWith("vertices:\n"),true);
+        // strictEqual(verticesString.startsWith("vertices:\n"),true);
         verticesString = verticesString.split("vertices:\n")[1];
         this.deserializeObjects(graph, verticesString, "vertex");
 
-        strictEqual(verticesString.length > 0, true);
-        strictEqual(typeof edgeString, "string");
-        strictEqual(edgeString.length > 0, true);
+        // strictEqual(verticesString.length > 0, true);
+        // strictEqual(typeof edgeString, "string");
+        // strictEqual(edgeString.length > 0, true);
         this.deserializeObjects(graph, edgeString, "edge");
 
         return graph
@@ -42,7 +41,7 @@ export default class YmlSerializer extends GraphSerializer {
                     parser(graph, rows);
                     rows = [];
                 }
-                strictEqual(cursor.endsWith(":"), true);
+                // strictEqual(cursor.endsWith(":"), true);
                 id = cursor.trim();
                 id = id.substring(0,id.length-1);
             }
@@ -113,9 +112,9 @@ export default class YmlSerializer extends GraphSerializer {
     }
 
     private deserializeEdge(graph: AverGraph, data: string[]){
-        strictEqual(data[0].trim().startsWith("source: "), true);
-        strictEqual(data[1].trim().startsWith("edgeType: "), true);
-        strictEqual(data[2].trim().startsWith("target: "), true);
+        // strictEqual(data[0].trim().startsWith("source: "), true);
+        // strictEqual(data[1].trim().startsWith("edgeType: "), true);
+        // strictEqual(data[2].trim().startsWith("target: "), true);
         let sourceString = data.shift().trim();
         let source = this.decodeYmlRow(sourceString).value;
         let edgeTypeString = data.shift().trim();
@@ -137,8 +136,8 @@ export default class YmlSerializer extends GraphSerializer {
     }
 
     private deserializeVertex(graph: AverGraph,data: string[]){
-        strictEqual(data[0].trim().startsWith("id: "), true);
-        strictEqual(data[1].trim().startsWith("class: "), true);
+        // strictEqual(data[0].trim().startsWith("id: "), true);
+        // strictEqual(data[1].trim().startsWith("class: "), true);
         let idString = data.shift().trim();
         let id = this.decodeYmlRow(idString).value;
         let classString = data.shift().trim();
